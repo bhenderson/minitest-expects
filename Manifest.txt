@@ -1,0 +1,8 @@
+.autotest
+History.txt
+Manifest.txt
+README.txt
+Rakefile
+bin/minitest/expects
+lib/minitest/expects.rb
+test/test_minitest/expects.rb
