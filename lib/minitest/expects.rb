@@ -115,6 +115,7 @@ class MiniTest::Expects
 
   def restore
     return self if restored?
+    # copied from MiniTest::Mock stub()
     metaclass.__send__ :undef_method, @meth
     metaclass.__send__ :alias_method, @meth, new_meth_name
     metaclass.__send__ :undef_method, new_meth_name
