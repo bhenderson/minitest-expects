@@ -1,5 +1,9 @@
 require 'minitest/unit'
 
+# never    => times(0)
+# once     => times(1)
+# any time => times(-1)
+# n times  => times(n)
 class MiniTest::Expects
   VERSION = '0.1.0'
 
@@ -21,7 +25,7 @@ class MiniTest::Expects
 
   def self.teardown
     @instances.each do |mocker|
-      mocker.restore
+      mocker.verify.restore
     end
   end
 
@@ -29,9 +33,8 @@ class MiniTest::Expects
     @subject = subject
 
     @any_instance = false
-    @count = 0
+    @count = -1
     @meth = nil
-    @restored = true
     @returns = nil
     @with = []
 
@@ -43,9 +46,14 @@ class MiniTest::Expects
     self
   end
 
+  def at_least n
+    @at_least = n
+    self
+  end
+
   def expects name
-    restore
     @meth = name
+    restore
 
     # copied from MiniTest::Mock stub()
     if @subject.respond_to? name and
@@ -62,31 +70,30 @@ class MiniTest::Expects
       mocker.match?(*args, &block)
     end
 
-    @restored = false
-
     self
   end
 
   def match? *args
+    flunk "called too many times" if @count == 0
+
+    # extra calls aren't recorded because they raise. If they were
+    # counted, we would get double errors from after_teardown.
     @count -= 1
+    matched = if Proc === @with
+                msg = "arguments block returned false"
+                @with.call(*args)
+              else
+                msg = "wrong arguments #{args.inspect}\nexpected #{@with.inspect}"
+                @with.size == args.size and
+                  @with.each_with_index.all? do |p, i|
+                    val = args[i]
+                    p == val or p === val
+                  end
+              end
 
-    flunk "called too many times" unless
-      @count != 0
+    flunk msg unless matched
 
-    pass = if Proc === @with
-             msg = "arguments block returned false"
-             @with.call(*args)
-           else
-             msg = "wrong arguments #{args.inspect}\nexpected #{@with.inspect}"
-             @with.size == args.size and
-               @with.each_with_index.all? do |p, i|
-                 val = args[i]
-                 p == val or p === val
-               end
-           end
-
-    flunk msg unless pass
-
+    raise *@raises if @raises
     yield @yields if block_given?
     @returns
   end
@@ -99,12 +106,18 @@ class MiniTest::Expects
     times 1
   end
 
+  # passed directly to raise()
+  # exception = RuntimeError, message = '', backtrace = nil
+  def raises *args
+    @raises = args
+    self
+  end
+
   def restore
-    return if @restored
+    return self if restored?
     metaclass.__send__ :undef_method, @meth
     metaclass.__send__ :alias_method, @meth, new_meth_name
     metaclass.__send__ :undef_method, new_meth_name
-    @restored = true
     self
   end
 
@@ -114,12 +127,12 @@ class MiniTest::Expects
   end
 
   def times n
-    @count = n + 1
+    @count = n
     self
   end
 
-  def verify
-    @count != 0 or flunk
+  def verify bt = caller
+    @count <= 0 or flunk "#{@subject}.#{@meth} expected. not called", bt
     self
   end
 
@@ -135,8 +148,8 @@ class MiniTest::Expects
 
   private
 
-  def flunk msg = nil
-    raise MiniTest::Assertion, msg
+  def flunk msg = nil, bt = nil
+    raise MiniTest::Assertion, msg, bt
   end
 
   def metaclass
@@ -146,6 +159,10 @@ class MiniTest::Expects
 
   def new_meth_name
     "__miniexpects__#{@meth}"
+  end
+
+  def restored?
+    !@subject.respond_to? new_meth_name
   end
 
 end
