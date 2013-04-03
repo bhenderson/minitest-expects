@@ -48,18 +48,17 @@ class TestMiniTest::TestExpects < MiniTest::Unit::TestCase
   end
 
   def test_with
-    @mock.with(1, nil, 2)
+    @mock.with(1)
+    @sub.foo 1
 
-    @sub.foo(1, nil, 2)
-
-    util_raises "wrong arguments [1, 2]\nexpected [1, nil, 2]" do
-      @sub.foo(1, 2)
+    util_raises "wrong arguments [1, 2]\nexpected [1]" do
+      @sub.foo 1, 2
     end
-    util_raises do
-      @sub.foo(1)
+    util_raises "wrong arguments [2]\nexpected [1]" do
+      @sub.foo 2
     end
-    util_raises do
-      @sub.foo(1,nil,2,3)
+    util_raises "wrong arguments []\nexpected [1]" do
+      @sub.foo
     end
   end
 
@@ -112,69 +111,44 @@ class TestMiniTest::TestExpects < MiniTest::Unit::TestCase
     assert_equal 'class method', @class.foo
   end
 
-  def test_times_default_one
-    util_raises do
-      @mock.verify
-    end
-  end
-
-  def test_at_least_once
-    m = @sub.
-      expects(:foo).
-      at_least(1)
-
-    util_raises do
-      m.verify
-    end
-
+  def test_default_times_unlimited
+    assert @mock.verify
     @sub.foo
     @sub.foo
-    assert m.verify
-  end
-
-  def test_times_default_allow_infinite
-    m = @sub.
-      expects(:foo)
-
-    @sub.foo
-    pass @sub.foo
-    assert m.verify
+    assert @mock.verify
   end
 
   def test_times_never
-    m = @sub.
-      expects(:foo).
-      times(0)
+    @mock.times(0)
 
     util_raises 'called too many times' do
       @sub.foo
     end
-    assert m.verify
+
+    assert @mock.verify
   end
 
   def test_times_once
-    m = @sub.
-      expects(:foo).
-      times(1)
+    @mock.times(1)
 
     @sub.foo
     util_raises do
       @sub.foo
     end
-    assert m.verify
+
+    assert @mock.verify
   end
 
   def test_times_twice
-    m = @sub.
-      expects(:foo).
-      times(2)
+    @mock.times(2)
 
     @sub.foo
     @sub.foo
     util_raises do
       @sub.foo
     end
-    assert m.verify
+
+    assert @mock.verify
   end
 
   def test_yields
@@ -204,16 +178,14 @@ class TestMiniTest::TestExpects < MiniTest::Unit::TestCase
   end
 
   def test_returns_self
-    m = @sub.expects(:foo)
-    assert_kind_of MiniTest::Expects, m
-    assert_same m, m.at_least(0)
-    assert_same m, m.raises
-    assert_same m, m.restore
-    assert_same m, m.restore
-    assert_same m, m.returns(1)
-    assert_same m, m.times(1)
-    assert_same m, m.with(1)
-    assert_same m, m.yields(1)
+    assert_kind_of MiniTest::Expects, @mock
+    assert_same @mock, @mock.raises
+    assert_same @mock, @mock.restore
+    assert_same @mock, @mock.restore
+    assert_same @mock, @mock.returns
+    assert_same @mock, @mock.times(0)
+    assert_same @mock, @mock.with
+    assert_same @mock, @mock.yields
   end
 
   def test_expects_non_existent_method

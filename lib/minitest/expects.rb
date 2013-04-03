@@ -15,7 +15,7 @@ class MiniTest::Expects
 
     def after_teardown
       super
-      # MiniTest::Expects.teardown
+      MiniTest::Expects.teardown
     end
   end
 
@@ -43,11 +43,6 @@ class MiniTest::Expects
 
   def any_instance
     @any_instance = true
-    self
-  end
-
-  def at_least n
-    @at_least = n
     self
   end
 
@@ -122,8 +117,8 @@ class MiniTest::Expects
     self
   end
 
-  def returns v
-    @returns = v
+  def returns val = nil
+    @returns = val
     self
   end
 
@@ -132,8 +127,9 @@ class MiniTest::Expects
     self
   end
 
-  def verify bt = caller
-    @count <= 0 or flunk "#{@subject}.#{@meth} expected. not called", bt
+  def verify
+    msg = "#{@subject}.#{@meth} not called sufficient number of times."
+    @count <= 0 or flunk msg
     self
   end
 
@@ -142,15 +138,15 @@ class MiniTest::Expects
     self
   end
 
-  def yields val
+  def yields val = nil
     @yields = val
     self
   end
 
   private
 
-  def flunk msg = nil, bt = nil
-    raise MiniTest::Assertion, msg, bt
+  def flunk msg = nil
+    raise MiniTest::Assertion, msg
   end
 
   def metaclass
