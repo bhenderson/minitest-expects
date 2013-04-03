@@ -30,12 +30,10 @@ class TestMiniTest::TestExpects < MiniTest::Unit::TestCase
   def setup
     @class = Subject
     @sub = @class.new
+    @mock = @sub.expects(:foo)
   end
 
   def test_expects
-    @sub.
-      expects(:foo)
-
     assert_equal 0, @sub.count, 'expects shouldnt call the method'
 
     @sub.foo()
@@ -44,17 +42,13 @@ class TestMiniTest::TestExpects < MiniTest::Unit::TestCase
   end
 
   def test_returns
-    @sub.
-      expects(:foo).
-      returns(:bar)
+    @mock.returns(:bar)
 
     assert_equal :bar, @sub.foo
   end
 
   def test_with
-    @sub.
-      expects(:foo).
-      with(1, nil, 2)
+    @mock.with(1, nil, 2)
 
     @sub.foo(1, nil, 2)
 
@@ -70,9 +64,7 @@ class TestMiniTest::TestExpects < MiniTest::Unit::TestCase
   end
 
   def test_with_class
-    @sub.
-      expects(:foo).
-      with(@class)
+    @mock.with(@class)
 
     @sub.foo(@sub)
     @sub.foo(@class)
@@ -83,27 +75,31 @@ class TestMiniTest::TestExpects < MiniTest::Unit::TestCase
   end
 
   def test_with_any_parameter
-    @sub.
-      expects(:foo).
-      with(Object)
+    @mock.with(Object)
 
     @sub.foo(@sub)
   end
 
   def test_with_block
-    @sub.
-      expects(:foo).
-      with{|v| v == 42}
+    @mock.with{|v| v == 42}
 
     @sub.foo(42)
 
-    m = @sub.
-      expects(:foo).
-      with{|v| v == 41}
+    @mock.with{|v| v == 41}
 
     util_raises "arguments block returned false" do
       @sub.foo(42)
     end
+
+    @mock.with{|v1,v2| v1 == :bugs and v2 == :bunny }
+    @sub.foo(:bugs, :bunny)
+  end
+
+  def test_restore
+    @mock.restore
+    @mock.restore
+    assert_equal 1, @sub.foo
+    assert @mock.verify
   end
 
   def test_class_expects
@@ -116,11 +112,10 @@ class TestMiniTest::TestExpects < MiniTest::Unit::TestCase
     assert_equal 'class method', @class.foo
   end
 
-  def test_times_default_allow_none
-    m = @sub.
-      expects(:foo)
-
-    assert m.verify, 'expected to allow 0 times'
+  def test_times_default_one
+    util_raises do
+      @mock.verify
+    end
   end
 
   def test_at_least_once
@@ -242,14 +237,6 @@ class TestMiniTest::TestExpects < MiniTest::Unit::TestCase
     m.restore
 
     assert_equal 'meta method', @sub.meta_meth
-  end
-
-  def test_restore
-    m = @sub.expects(:foo)
-    m.restore
-    m.restore
-    assert_equal 1, @sub.foo
-    assert m.verify
   end
 
   def test_expects_multiple_methods
