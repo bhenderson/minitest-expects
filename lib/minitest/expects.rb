@@ -159,11 +159,15 @@ class MiniTest::Expects
   end
 
   def new_meth_name
-    "__miniexpects__#{@meth}"
+    :"__miniexpects__#{@meth}"
   end
 
   def restored?
-    !@subject.respond_to? new_meth_name
+    methods = @any_instance ?
+                @subject.instance_methods :
+                @subject.methods
+
+    !methods.include? new_meth_name
   end
 
 end

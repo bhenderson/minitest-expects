@@ -191,20 +191,15 @@ class TestMiniTest::TestExpects < MiniTest::Unit::TestCase
   end
 
   def test_any_instance
-    m = @class.any_instance
+    @mock = @class.
+              any_instance.
+              expects(:third).
+              returns('tres')
 
-    m1 = m.expects(:foo).returns('any')
-    m2 = m.expects(:third).returns('tres')
-
-    refute_same m1, m2
-
-    assert_equal 'any', @sub.foo
     assert_equal 'tres', @sub.third
 
-    m1.restore
-    m2.restore
+    @mock.restore
 
-    assert_equal 1, @sub.foo
     assert_equal 3, @sub.third
   end
 
