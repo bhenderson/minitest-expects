@@ -122,8 +122,8 @@ class MiniTest::Expects
     self
   end
 
-  def times n
-    @count = n
+  def times num
+    @count = num
     self
   end
 
@@ -133,8 +133,8 @@ class MiniTest::Expects
     self
   end
 
-  def with *a, &b
-    @with = b || a
+  def with *args, &block
+    @with = block || args
     self
   end
 
