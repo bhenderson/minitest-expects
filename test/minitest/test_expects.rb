@@ -267,6 +267,30 @@ class TestMiniTest::TestExpects < MiniTest::Unit::TestCase
     assert_equal ['bt'], e.backtrace
   end
 
+  def test_override_count
+    @mock.times 1
+
+    m = @sub.
+      expects(:foo).
+      never
+
+    assert_same @mock, m
+  end
+
+  def test_called_wrong_params
+    @mock.with(1).once
+
+    util_raises do
+      @sub.foo(2)
+    end
+
+    util_raises do
+      @mock.verify
+    end
+
+    @sub.foo(1) # verify
+  end
+
   def util_raises msg = nil
     e = assert_raises MiniTest::Assertion do
       yield

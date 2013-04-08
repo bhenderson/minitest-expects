@@ -19,12 +19,16 @@ class MiniTest::Expects
     end
   end
 
+  def self.expects subject, name
+    instances[[subject,name]] ||= new(subject).expects(name)
+  end
+
   def self.instances
-    @instances ||= []
+    @instances ||= {}
   end
 
   def self.teardown
-    @instances.each do |mocker|
+    @instances.values.each do |mocker|
       mocker.verify.restore
     end
   end
@@ -37,8 +41,6 @@ class MiniTest::Expects
     @meth = nil
     @returns = nil
     @with = []
-
-    self.class.instances << self
   end
 
   def any_instance
@@ -48,7 +50,6 @@ class MiniTest::Expects
 
   def expects name
     @meth = name
-    restore
 
     # copied from MiniTest::Mock stub()
     if @subject.respond_to? name and
@@ -71,9 +72,6 @@ class MiniTest::Expects
   def match? *args
     flunk "called too many times" if @count == 0
 
-    # extra calls aren't recorded because they raise. If they were
-    # counted, we would get double errors from after_teardown.
-    @count -= 1
     matched = if Proc === @with
                 msg = "arguments block returned false"
                 @with.call(*args)
@@ -87,6 +85,10 @@ class MiniTest::Expects
               end
 
     flunk msg unless matched
+
+    # extra calls aren't recorded because they raise. If they were
+    # counted, we would get double errors from after_teardown.
+    @count -= 1
 
     raise *@raises if @raises
     yield @yields if block_given?
@@ -170,7 +172,7 @@ end
 
 class Object
   def expects name
-    MiniTest::Expects.new(self).expects(name)
+    MiniTest::Expects.expects(self, name)
   end
 
   def any_instance
