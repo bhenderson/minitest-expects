@@ -20,6 +20,7 @@ class MiniTest::Expects
   end
 
   def self.expects subject, name
+    name = name.intern
     instances[[subject,name]] ||= new(subject).expects(name)
   end
 

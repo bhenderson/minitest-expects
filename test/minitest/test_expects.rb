@@ -291,6 +291,12 @@ class TestMiniTest::TestExpects < MiniTest::Unit::TestCase
     @sub.foo(1) # verify
   end
 
+  def test_mock_method_name_string
+    m = @sub.expects('foo')
+
+    assert_same m, @mock
+  end
+
   def util_raises msg = nil
     e = assert_raises MiniTest::Assertion do
       yield
