@@ -51,13 +51,13 @@ class TestMiniTest::TestExpects < MiniTest::Unit::TestCase
     @mock.with(1)
     @sub.foo 1
 
-    util_raises "wrong arguments [1, 2]\nexpected [1]" do
+    util_raises "mocked method :foo expects 1 arguments, got 2" do
       @sub.foo 1, 2
     end
-    util_raises "wrong arguments [2]\nexpected [1]" do
+    util_raises "mocked method :foo called with unexpected arguments [2]" do
       @sub.foo 2
     end
-    util_raises "wrong arguments []\nexpected [1]" do
+    util_raises "mocked method :foo expects 1 arguments, got 0" do
       @sub.foo
     end
   end
@@ -86,7 +86,7 @@ class TestMiniTest::TestExpects < MiniTest::Unit::TestCase
 
     @mock.with{|v| v == 41}
 
-    util_raises "arguments block returned false" do
+    util_raises "mocked method :foo argument block returned false" do
       @sub.foo(42)
     end
 

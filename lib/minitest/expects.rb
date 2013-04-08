@@ -70,21 +70,30 @@ class MiniTest::Expects
   end
 
   def match? *args
+    # copied some error messages and logic from MiniTest::Mock.
+
     flunk "called too many times" if @count == 0
 
-    matched = if Proc === @with
-                msg = "arguments block returned false"
-                @with.call(*args)
-              else
-                msg = "wrong arguments #{args.inspect}\nexpected #{@with.inspect}"
-                @with.size == args.size and
-                  @with.each_with_index.all? do |p, i|
-                    val = args[i]
-                    p == val or p === val
-                  end
-              end
+    if Proc === @with
+      unless @with.call(*args)
+        flunk "mocked method %p argument block returned false" %
+          [@meth]
+      end
+    else
+      if @with.size != args.size
+        flunk "mocked method %p expects %d arguments, got %d" %
+          [@meth, @with.size, args.size]
+      end
 
-    flunk msg unless matched
+      fully_matched = @with.zip(args).all? { |val1, val2|
+        val1 == val2 or val1 === val2
+      }
+
+      unless fully_matched
+        flunk "mocked method %p called with unexpected arguments %p" %
+          [@meth, args]
+      end
+    end
 
     # extra calls aren't recorded because they raise. If they were
     # counted, we would get double errors from after_teardown.
@@ -130,8 +139,10 @@ class MiniTest::Expects
   end
 
   def verify
-    msg = "#{@subject}.#{@meth} not called sufficient number of times."
-    @count <= 0 or flunk msg
+    if @count > 0
+      flunk "mocked method %p called more than expected" %
+        [@meth]
+    end
     self
   end
 
