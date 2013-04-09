@@ -369,6 +369,26 @@ class TestMiniTest::TestExpects < MiniTest::Unit::TestCase
     @sub.foo # verify
   end
 
+  def test_any_instance_reuse
+    @mock.restore
+
+    klass = Class.new do
+      def foo() :foo end
+      def bar() :bar end
+    end
+
+    m1 = klass.
+      any_instance.
+      expects(:foo)
+    m2 = klass.
+      any_instance.
+      expects(:foo)
+
+    assert_same m1, m2
+
+    m1.restore
+  end
+
   def util_raises msg = nil
     e = assert_raises MiniTest::Assertion do
       yield

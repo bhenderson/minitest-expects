@@ -19,13 +19,8 @@ class MiniTest::Expects
     end
   end
 
-  def self.expects subject, name
-    name = name.intern
-    instances[[subject,name]] ||= new(subject).expects(name)
-  end
-
   def self.instances
-    @instances ||= {}
+    @instances ||= Hash.new
   end
 
   def self.teardown
@@ -34,25 +29,26 @@ class MiniTest::Expects
     end
   end
 
-  def initialize subject
+  def initialize subject, any_instance = false
     @subject = subject
 
-    @any_instance = false
+    @any_instance = !!any_instance
     @count = 1
     @meth = nil
     @returns = nil
     @with = []
   end
 
-  def any_instance
-    @any_instance = true
-    self
-  end
-
   def expects name
+    name = name.intern
+    if mocker = self.class.instances[[@subject,name]]
+      return mocker
+    end
+
     @meth = name
 
     # copied from MiniTest::Mock stub()
+    # TODO make this work for any_instance
     if @subject.respond_to? name and
       not @subject.methods.map(&:to_s).include? name.to_s then
       metaclass.send :define_method, name do |*args|
@@ -66,6 +62,8 @@ class MiniTest::Expects
     metaclass.__send__ :define_method, name do |*args, &block|
       mocker.match?(*args, &block)
     end
+
+    self.class.instances[[@subject,name]] = self
 
     self
   end
@@ -198,11 +196,11 @@ end
 
 class Object
   def expects name
-    MiniTest::Expects.expects(self, name)
+    MiniTest::Expects.new(self).expects(name)
   end
 
   def any_instance
-    MiniTest::Expects.new(self).any_instance
+    MiniTest::Expects.new(self, true)
   end
 end
 
