@@ -51,10 +51,13 @@ class MiniTest::Expects
 
     @meth = name
 
+    # woh! is this hacky? Call allocate to get around not knowing how to call
+    # new().
+    sub = @any_instance ? @subject.allocate : @subject
+
     # copied from MiniTest::Mock stub()
-    # TODO make this work for any_instance
-    if @subject.respond_to? name and
-      not @subject.methods.map(&:to_s).include? name.to_s then
+    if sub.respond_to? name and
+      not sub.methods.map(&:to_s).include? name.to_s then
       subject_class.__send__ :define_method, name do |*args|
         super(*args)
       end

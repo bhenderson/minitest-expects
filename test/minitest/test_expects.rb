@@ -428,6 +428,17 @@ class TestMiniTest::TestExpects < MiniTest::Unit::TestCase
     pass
   end
 
+  def test_any_instance_meta_method
+    @mock.restore
+
+    @class.
+      any_instance.
+      expects(:meta_meth).
+      returns('mocked!')
+
+    assert_equal 'mocked!', @sub.meta_meth
+  end
+
   def util_raises msg = nil
     e = assert_raises MiniTest::Assertion do
       yield
