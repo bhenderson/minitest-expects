@@ -184,6 +184,10 @@ class TestMiniTest::TestExpects < MiniTest::Unit::TestCase
       @sub.bar
     end
 
+    util_raises do
+      m.verify
+    end
+
     @mock.restore
     m.restore
   end
