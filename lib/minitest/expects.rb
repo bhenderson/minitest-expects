@@ -51,7 +51,7 @@ class MiniTest::Expects
     # TODO make this work for any_instance
     if @subject.respond_to? name and
       not @subject.methods.map(&:to_s).include? name.to_s then
-      subject_class.send :define_method, name do |*args|
+      subject_class.__send__ :define_method, name do |*args|
         super(*args)
       end
     end
