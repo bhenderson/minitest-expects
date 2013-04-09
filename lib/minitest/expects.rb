@@ -51,15 +51,15 @@ class MiniTest::Expects
     # TODO make this work for any_instance
     if @subject.respond_to? name and
       not @subject.methods.map(&:to_s).include? name.to_s then
-      metaclass.send :define_method, name do |*args|
+      subject_class.send :define_method, name do |*args|
         super(*args)
       end
     end
 
-    metaclass.__send__ :alias_method, new_meth_name, @meth
+    subject_class.__send__ :alias_method, new_meth_name, @meth
 
     expecter = self
-    metaclass.__send__ :define_method, name do |*args, &block|
+    subject_class.__send__ :define_method, name do |*args, &block|
       expecter.match?(*args, &block)
     end
 
@@ -132,9 +132,9 @@ class MiniTest::Expects
   def restore
     return self if restored?
     # copied from MiniTest::Mock stub()
-    metaclass.__send__ :undef_method, @meth
-    metaclass.__send__ :alias_method, @meth, new_meth_name
-    metaclass.__send__ :undef_method, new_meth_name
+    subject_class.__send__ :undef_method, @meth
+    subject_class.__send__ :alias_method, @meth, new_meth_name
+    subject_class.__send__ :undef_method, new_meth_name
 
     # satisfy verify
     @count = -1
@@ -175,7 +175,7 @@ class MiniTest::Expects
     raise MiniTest::Assertion, msg
   end
 
-  def metaclass
+  def subject_class
     return @subject if @any_instance
     class << @subject; self; end
   end
