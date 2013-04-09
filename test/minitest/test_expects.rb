@@ -400,6 +400,34 @@ class TestMiniTest::TestExpects < MiniTest::Unit::TestCase
     assert @mock.verify
   end
 
+  def test_default_no_params
+    util_raises do
+      @sub.foo 1
+    end
+
+    @sub.foo # verify
+  end
+
+  def test_with_any_parameters
+    @mock.with{ true }
+
+    @sub.foo 1,2,3
+
+    pass
+  end
+
+  def test_with_no_parameters
+    @mock.with{ true }
+    @mock.with # override
+
+    util_raises do
+      @sub.foo 1
+    end
+
+    @sub.foo
+    pass
+  end
+
   def util_raises msg = nil
     e = assert_raises MiniTest::Assertion do
       yield

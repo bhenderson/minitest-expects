@@ -36,7 +36,7 @@ class MiniTest::Expects
     @count = 1
     @meth = nil
     @returns = nil
-    @with = []
+    @with = [] # default no parameters
   end
 
   def any_time
