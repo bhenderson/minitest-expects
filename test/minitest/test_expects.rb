@@ -192,6 +192,22 @@ class TestMiniTest::TestExpects < MiniTest::Unit::TestCase
     m.restore
   end
 
+  def test_yields_returns
+    @mock.restore
+
+    def @sub.bar() yield 3 end
+    @mock = @sub.
+      expects(:bar).
+      yields(4)
+
+    def self.return_bar
+      @sub.bar do return end
+    end
+    return_bar
+
+    assert @mock.verify
+  end
+
   def test_yields_multiple_params
     def @sub.bar() yield 1,2 end
 

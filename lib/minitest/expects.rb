@@ -96,17 +96,20 @@ class MiniTest::Expects
       end
     end
 
+    # TODO check arity?
     if @yields
       unless block_given?
         flunk "mocked method %p expected to yield, no block given" %
           [@meth]
       end
-      yield *@yields
     end
 
     # extra calls aren't recorded because they raise. If they were
     # counted, we would get double errors from after_teardown.
     @count -= 1
+
+    # must be after count
+    yield *@yields if block_given?
 
     raise *@raises if @raises
 
