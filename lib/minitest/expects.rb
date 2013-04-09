@@ -38,7 +38,7 @@ class MiniTest::Expects
     @subject = subject
 
     @any_instance = false
-    @count = -1
+    @count = 1
     @meth = nil
     @returns = nil
     @with = []
@@ -101,7 +101,15 @@ class MiniTest::Expects
     @count -= 1
 
     raise *@raises if @raises
-    yield @yields if block_given?
+
+    if @yields
+      unless block_given?
+        flunk "mocked method %p expected to yield, no block given" %
+          [@meth]
+      end
+      yield *@yields
+    end
+
     @returns
   end
 
@@ -126,6 +134,9 @@ class MiniTest::Expects
     metaclass.__send__ :undef_method, @meth
     metaclass.__send__ :alias_method, @meth, new_meth_name
     metaclass.__send__ :undef_method, new_meth_name
+
+    # satisfy verify
+    @count = -1
     self
   end
 
@@ -141,8 +152,8 @@ class MiniTest::Expects
 
   def verify
     if @count > 0
-      flunk "mocked method %p called more than expected" %
-        [@meth]
+      flunk "mocked method %p not called %d times" %
+        [@meth, @count]
     end
     self
   end
@@ -152,8 +163,8 @@ class MiniTest::Expects
     self
   end
 
-  def yields val = nil
-    @yields = val
+  def yields *args
+    @yields = args
     self
   end
 

@@ -48,7 +48,10 @@ class TestMiniTest::TestExpects < MiniTest::Unit::TestCase
   end
 
   def test_with
-    @mock.with(1)
+    @mock.
+      with(1).
+      times(-1)
+
     @sub.foo 1
 
     util_raises "mocked method :foo expects 1 arguments, got 2" do
@@ -63,7 +66,9 @@ class TestMiniTest::TestExpects < MiniTest::Unit::TestCase
   end
 
   def test_with_class
-    @mock.with(@class)
+    @mock.
+      with(@class).
+      times(-1)
 
     @sub.foo(@sub)
     @sub.foo(@class)
@@ -84,13 +89,13 @@ class TestMiniTest::TestExpects < MiniTest::Unit::TestCase
 
     @sub.foo(42)
 
-    @mock.with{|v| v == 41}
+    @mock.with{|v| v == 41}.once
 
     util_raises "mocked method :foo argument block returned false" do
       @sub.foo(42)
     end
 
-    @mock.with{|v1,v2| v1 == :bugs and v2 == :bunny }
+    @mock.with{|v1,v2| v1 == :bugs and v2 == :bunny }.once
     @sub.foo(:bugs, :bunny)
   end
 
@@ -102,6 +107,8 @@ class TestMiniTest::TestExpects < MiniTest::Unit::TestCase
   end
 
   def test_class_expects
+    @mock.restore
+
     m = @class.
       expects(:foo)
 
@@ -111,10 +118,11 @@ class TestMiniTest::TestExpects < MiniTest::Unit::TestCase
     assert_equal 'class method', @class.foo
   end
 
-  def test_default_times_unlimited
-    assert @mock.verify
+  def test_default_times_once
     @sub.foo
-    @sub.foo
+    util_raises do
+      @sub.foo
+    end
     assert @mock.verify
   end
 
@@ -162,9 +170,44 @@ class TestMiniTest::TestExpects < MiniTest::Unit::TestCase
     @sub.bar do |v| val = v end
 
     assert_equal 4, val
+
+    @mock.restore
+  end
+
+  def test_yields_failure
+    def @sub.bar() yield 3 end
+    m = @sub.
+      expects(:bar).
+      yields(4)
+
+    util_raises 'mocked method :bar expected to yield, no block given' do
+      @sub.bar
+    end
+
+    @mock.restore
+    m.restore
+  end
+
+  def test_yields_multiple_params
+    def @sub.bar() yield 1,2 end
+
+    val = nil
+    @sub.bar do |*a| val = a end
+    assert_equal [1,2], val
+
+    @sub.
+      expects(:bar).
+      yields(3,4)
+
+    @sub.bar do |*a| val = a end
+    assert_equal [3,4], val
+
+    @mock.restore
   end
 
   def test_any_instance
+    @mock.restore
+
     @mock = @class.
               any_instance.
               expects(:third).
@@ -192,6 +235,8 @@ class TestMiniTest::TestExpects < MiniTest::Unit::TestCase
     assert_raises NameError do
       @sub.expects(:bar)
     end
+
+    @mock.restore
   end
 
   def test_method_missing_methods
@@ -204,6 +249,8 @@ class TestMiniTest::TestExpects < MiniTest::Unit::TestCase
     m.restore
 
     assert_equal 'meta method', @sub.meta_meth
+
+    @mock.restore
   end
 
   def test_expects_multiple_methods
@@ -223,9 +270,7 @@ class TestMiniTest::TestExpects < MiniTest::Unit::TestCase
   end
 
   def test_raises_default_error
-    @sub.
-      expects(:foo).
-      raises
+    @mock.raises
 
     assert_raises RuntimeError do
       @sub.foo
@@ -234,9 +279,7 @@ class TestMiniTest::TestExpects < MiniTest::Unit::TestCase
 
   def test_raises_specific_error
     err = Class.new ::Exception
-    @sub.
-      expects(:foo).
-      raises(err)
+    @mock.raises(err)
 
     assert_raises err do
       @sub.foo
@@ -244,9 +287,7 @@ class TestMiniTest::TestExpects < MiniTest::Unit::TestCase
   end
 
   def test_raises_message
-    @sub.
-      expects(:foo).
-      raises('error')
+    @mock.raises('error')
 
     e = assert_raises RuntimeError do
       @sub.foo
@@ -256,9 +297,7 @@ class TestMiniTest::TestExpects < MiniTest::Unit::TestCase
 
   def test_raises_error_and_message_and_backtrace
     err = Class.new ::Exception
-    @sub.
-      expects(:foo).
-      raises(err, 'error', ['bt'])
+    @mock.raises(err, 'error', ['bt'])
 
     e = assert_raises err do
       @sub.foo
@@ -295,6 +334,19 @@ class TestMiniTest::TestExpects < MiniTest::Unit::TestCase
     m = @sub.expects('foo')
 
     assert_same m, @mock
+
+    @mock.restore
+    m.restore
+  end
+
+  def test_verify_message
+    @mock.once
+
+    util_raises "mocked method :foo not called 1 times" do
+      @mock.verify
+    end
+
+    @sub.foo # verify
   end
 
   def util_raises msg = nil
