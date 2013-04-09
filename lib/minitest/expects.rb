@@ -39,6 +39,10 @@ class MiniTest::Expects
     @with = []
   end
 
+  def any_time
+    times -1
+  end
+
   def expects name
     name = name.intern
     if expecter = self.class.instances[[@subject,name]]

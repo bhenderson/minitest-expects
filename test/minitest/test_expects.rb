@@ -389,6 +389,17 @@ class TestMiniTest::TestExpects < MiniTest::Unit::TestCase
     m1.restore
   end
 
+  def test_any_time
+    @mock.any_time
+    assert @mock.verify
+
+    @sub.foo
+    assert @mock.verify
+
+    @sub.foo
+    assert @mock.verify
+  end
+
   def util_raises msg = nil
     e = assert_raises MiniTest::Assertion do
       yield
