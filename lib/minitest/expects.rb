@@ -24,8 +24,8 @@ class MiniTest::Expects
   end
 
   def self.teardown
-    @instances.values.each do |mocker|
-      mocker.verify.restore
+    @instances.values.each do |expecter|
+      expecter.verify.restore
     end
   end
 
@@ -41,8 +41,8 @@ class MiniTest::Expects
 
   def expects name
     name = name.intern
-    if mocker = self.class.instances[[@subject,name]]
-      return mocker
+    if expecter = self.class.instances[[@subject,name]]
+      return expecter
     end
 
     @meth = name
@@ -58,9 +58,9 @@ class MiniTest::Expects
 
     metaclass.__send__ :alias_method, new_meth_name, @meth
 
-    mocker = self
+    expecter = self
     metaclass.__send__ :define_method, name do |*args, &block|
-      mocker.match?(*args, &block)
+      expecter.match?(*args, &block)
     end
 
     self.class.instances[[@subject,name]] = self
