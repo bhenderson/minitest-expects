@@ -439,6 +439,14 @@ class TestMiniTest::TestExpects < MiniTest::Unit::TestCase
     assert_equal 'mocked!', @sub.meta_meth
   end
 
+  def test_any_instance_only_on_class
+    @mock.restore
+
+    assert_raises NoMethodError do
+      @sub.any_instance
+    end
+  end
+
   def util_raises msg = nil
     e = assert_raises MiniTest::Assertion do
       yield

@@ -205,7 +205,9 @@ class Object
   def expects name
     MiniTest::Expects.new(self).expects(name)
   end
+end
 
+class Class
   def any_instance
     MiniTest::Expects.new(self, true)
   end
