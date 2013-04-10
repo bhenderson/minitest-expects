@@ -45,7 +45,9 @@ class MiniTest::Expects
 
   def expects name
     name = name.intern
-    if expecter = self.class.instances[[@subject,name]]
+    instance_key = [@subject, name]
+
+    if expecter = self.class.instances[instance_key]
       return expecter
     end
 
@@ -70,7 +72,7 @@ class MiniTest::Expects
       expecter.match?(*args, &block)
     end
 
-    self.class.instances[[@subject,name]] = self
+    self.class.instances[instance_key] = self
 
     self
   end
