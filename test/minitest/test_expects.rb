@@ -510,10 +510,10 @@ class TestMiniTest::TestExpects < MiniTest::Unit::TestCase
     MiniTest::Expects.instances.delete [@sub, :foo]
   end
 
-  # TODO better error messaging and bt.
+  # TODO better error messaging
 
   def util_raises msg = nil
-    e = assert_raises MiniTest::Assertion do
+    e = assert_raises MockExpectationError do
       yield
     end
     assert_equal msg, e.message if msg

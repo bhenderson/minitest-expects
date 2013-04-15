@@ -1,9 +1,6 @@
 require 'minitest/unit'
+require 'minitest/mock'
 
-# never    => times(0)
-# once     => times(1)
-# any time => times(-1)
-# n times  => times(n)
 class MiniTest::Expects
   VERSION = '0.1.0'
 
@@ -201,7 +198,7 @@ class MiniTest::Expects
   private
 
   def flunk msg = nil
-    raise MiniTest::Assertion, msg
+    raise MockExpectationError, msg
   end
 
   def instance_key
