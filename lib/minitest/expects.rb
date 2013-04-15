@@ -1,26 +1,45 @@
 require 'minitest/unit'
 require 'minitest/mock'
 
+##
+# Mocking framework based off of MiniTest::Mock, but with the api of
+# Mocha
+#
+#   class Greeter
+#     def hi
+#       'hello world'
+#     end
+#   end
+#
+#   gtr = Greeter.new
+#   expecter = gtr.expects(:hi).returns 'yo!'
+#
+#   gtr.hi # => 'yo!'
+#   expecter.verify # => true
+#   expecter.restore
+#
+#   gtr.hi # => 'hello world'
+
 class MiniTest::Expects
   VERSION = '0.1.0'
 
-  def self.expects subject, name
+  def self.expects subject, name # :nodoc:
     # save an instance creation at the cost of duplicating #instance_key
     # logic.
     instances[[subject, name.intern]] || new(subject).expects(name)
   end
 
-  def self.instances
+  def self.instances # :nodoc:
     @instances ||= Hash.new
   end
 
-  def self.teardown
+  def self.teardown # :nodoc:
     @instances.values.each do |expecter|
       expecter.verify.restore
     end
   end
 
-  def initialize subject, any_instance = false
+  def initialize subject, any_instance = false # :nodoc:
     @subject = subject
 
     @any_instance = !!any_instance
@@ -30,13 +49,33 @@ class MiniTest::Expects
     @with = [] # default no parameters
   end
 
-  def initialize_dup other
+  def initialize_dup other # :nodoc:
     initialize other.subject, other.any_instance
   end
+
+  ##
+  # Allow any number of times.
 
   def any_time
     times -1
   end
+
+  ##
+  # Main entry method. This method is invoked when Object#expects is
+  # called. It returns the same expecter if +name+ and subject is the
+  # same.
+  #
+  #   exp1 = gtr.expects(:hi)
+  #   exp2 = gtr.expects(:hi)
+  #
+  #   exp1.equal exp2
+  #
+  # If Class#any_instance is used, it returns a new expecter for each
+  # unique +name+
+  #
+  # The default behavior is that it is expected to be called exactly one
+  # time, with no arguments and returns nil. All of these behaviors are
+  # of course configurable using the api methods.
 
   def expects name
     # any_instance
@@ -73,7 +112,7 @@ class MiniTest::Expects
     self
   end
 
-  def match? *args
+  def match? *args # :nodoc:
     # copied some error messages and logic from MiniTest::Mock.
 
     flunk "called too many times" if @count == 0
@@ -119,20 +158,37 @@ class MiniTest::Expects
     @returns
   end
 
+  ##
+  # Never called.
+  #
+  # see #times
+
   def never
     times 0
   end
+
+  ##
+  # Called exactly one time.
+  #
+  # see #times
 
   def once
     times 1
   end
 
-  # passed directly to raise()
-  # exception = RuntimeError, message = '', backtrace = nil
+  ##
+  # Set mocked method to raise when called.
+  #
+  # Arguments are exactly like raise()
+  # :args: RuntimeError, message = '', backtrace = nil
+
   def raises *args
     @raises = args
     self
   end
+
+  ##
+  # Restore the mocked method to original.
 
   def restore
     return self if restored?
@@ -151,15 +207,30 @@ class MiniTest::Expects
     self
   end
 
+  ##
+  # Set what the mocked method returns.
+
   def returns val = nil
     @returns = val
     self
   end
 
+  ##
+  # Set how many times the mocked method can be called.
+  #
+  # 0  - exactly 0 times.
+  # +n - exactly +num+ times
+  # -n - any number of times.
+
   def times num
     @count = num
     self
   end
+
+  ##
+  # Verify that the mocked method was called appropriately.
+  #
+  # Raises if false.
 
   def verify
     if @count > 0
@@ -169,10 +240,22 @@ class MiniTest::Expects
     self
   end
 
+  ##
+  # Set the expected arguments of the mocked method.
+  #
+  # Arguments are matched against #== then #=== to allow case matching.
+  #
+  # Raises when mocked method arguments don't match.
+
   def with *args, &block
     @with = block || args
     self
   end
+
+  ##
+  # Set the value that the mocked method yields when called.
+  #
+  # Raises if mocked method not called with a block.
 
   def yields *args
     @yields = args
