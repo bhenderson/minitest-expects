@@ -212,6 +212,8 @@ class MiniTest::Expects
 
 end
 
+# :stopdoc:
+
 class Object
   def expects name
     MiniTest::Expects.expects(self, name)
