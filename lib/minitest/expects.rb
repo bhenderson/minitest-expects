@@ -4,18 +4,6 @@ require 'minitest/mock'
 class MiniTest::Expects
   VERSION = '0.1.0'
 
-  module LifeCycleHooks
-    def before_setup
-      MiniTest::Expects.instances.clear
-      super
-    end
-
-    def after_teardown
-      super
-      MiniTest::Expects.teardown
-    end
-  end
-
   def self.expects subject, name
     # save an instance creation at the cost of duplicating #instance_key
     # logic.
@@ -233,6 +221,18 @@ end
 class Class
   def any_instance
     MiniTest::Expects.new(self, true)
+  end
+end
+
+module MiniTest::Expects::LifeCycleHooks
+  def before_setup
+    MiniTest::Expects.instances.clear
+    super
+  end
+
+  def after_teardown
+    super
+    MiniTest::Expects.teardown
   end
 end
 
