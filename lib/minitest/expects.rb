@@ -180,7 +180,6 @@ class MiniTest::Expects
   # Set mocked method to raise when called.
   #
   # Arguments are exactly like raise()
-  # :args: RuntimeError, message = '', backtrace = nil
 
   def raises *args
     @raises = args
