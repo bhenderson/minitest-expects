@@ -19,6 +19,12 @@ class MiniTest::Expects
     end
   end
 
+  def self.expects subject, name
+    # save an instance creation at the cost of duplicating #instance_key
+    # logic.
+    instances[[subject, name.intern]] || new(subject).expects(name)
+  end
+
   def self.instances
     @instances ||= Hash.new
   end
@@ -223,7 +229,7 @@ end
 
 class Object
   def expects name
-    MiniTest::Expects.new(self).expects(name)
+    MiniTest::Expects.expects(self, name)
   end
 end
 

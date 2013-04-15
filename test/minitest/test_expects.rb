@@ -502,6 +502,14 @@ class TestMiniTest::TestExpects < MiniTest::Unit::TestCase
     assert_equal 'bar', @sub.bar
   end
 
+  def test_class_level_lookup
+    MiniTest::Expects.instances[[@sub, :foo]] = :foo
+
+    assert_equal :foo, @sub.expects(:foo)
+
+    MiniTest::Expects.instances.delete [@sub, :foo]
+  end
+
   # TODO better error messaging and bt.
 
   def util_raises msg = nil
