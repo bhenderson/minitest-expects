@@ -39,11 +39,18 @@ class MiniTest::Expects
     @with = [] # default no parameters
   end
 
+  def initialize_dup other
+    initialize other.subject, other.any_instance
+  end
+
   def any_time
     times -1
   end
 
   def expects name
+    # any_instance
+    return dup.expects(name) if @meth
+
     @meth = name.intern
 
     if expecter = self.class.instances[instance_key]
@@ -180,6 +187,10 @@ class MiniTest::Expects
     @yields = args
     self
   end
+
+  protected
+
+  attr_reader :subject, :any_instance
 
   private
 

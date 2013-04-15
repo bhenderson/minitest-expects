@@ -464,6 +464,44 @@ class TestMiniTest::TestExpects < MiniTest::Unit::TestCase
     assert_equal 1, @class.new.foo
   end
 
+  def test_double_any_instance
+    @mock.restore
+
+    @class = Class.new do
+      def foo() :foo end
+      def bar() :bar end
+    end
+
+    @class.any_instance.expects(:foo).returns('foo')
+    @class.any_instance.expects(:bar).returns('bar')
+
+    @sub = @class.new
+
+    assert_equal 'foo', @sub.foo
+    assert_equal 'bar', @sub.bar
+  end
+
+  def test_any_instance_double_expects
+    @mock.restore
+
+    @class = Class.new do
+      def foo() :foo end
+      def bar() :bar end
+    end
+
+    @mock = @class.any_instance
+
+    @mock.expects(:foo).returns 'foo'
+    new_mock = @mock.expects(:bar).returns 'bar'
+
+    refute_same @mock, new_mock
+
+    @sub = @class.new
+
+    assert_equal 'foo', @sub.foo
+    assert_equal 'bar', @sub.bar
+  end
+
   # TODO better error messaging and bt.
 
   def util_raises msg = nil
