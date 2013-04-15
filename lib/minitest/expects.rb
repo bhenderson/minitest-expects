@@ -44,19 +44,17 @@ class MiniTest::Expects
   end
 
   def expects name
-    name = name.intern
-    instance_key = [@subject, name]
+    @meth = name.intern
 
     if expecter = self.class.instances[instance_key]
       return expecter
     end
 
-    @meth = name
-
     # woh! is this hacky? Call allocate to get around not knowing how to call
     # new().
     sub = @any_instance ? @subject.allocate : @subject
 
+    # handle meta methods.
     # copied from MiniTest::Mock stub()
     if sub.respond_to? name and
       not sub.methods.map(&:to_s).include? name.to_s then
@@ -147,7 +145,7 @@ class MiniTest::Expects
     subject_class.__send__ :undef_method, new_meth_name
 
     # remove self
-    self.class.instances.delete [@subject, @meth]
+    self.class.instances.delete instance_key
 
     # satisfy verify
     @count = -1
@@ -187,6 +185,10 @@ class MiniTest::Expects
 
   def flunk msg = nil
     raise MiniTest::Assertion, msg
+  end
+
+  def instance_key
+    [@subject, @meth]
   end
 
   def subject_class
