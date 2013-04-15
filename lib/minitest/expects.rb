@@ -140,13 +140,18 @@ class MiniTest::Expects
 
   def restore
     return self if restored?
+
     # copied from MiniTest::Mock stub()
     subject_class.__send__ :undef_method, @meth
     subject_class.__send__ :alias_method, @meth, new_meth_name
     subject_class.__send__ :undef_method, new_meth_name
 
+    # remove self
+    self.class.instances.delete [@subject, @meth]
+
     # satisfy verify
     @count = -1
+
     self
   end
 

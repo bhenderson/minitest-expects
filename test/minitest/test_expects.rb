@@ -447,6 +447,25 @@ class TestMiniTest::TestExpects < MiniTest::Unit::TestCase
     end
   end
 
+  def test_duplicate_expects_any_instance
+    @mock.restore
+
+    m = @class.any_instance.expects(:foo).returns :any_instance
+
+    @mock = @sub.expects(:foo).returns :instance
+
+    assert_equal :instance, @sub.foo
+    assert_equal :any_instance, @class.new.foo
+
+    @mock.restore
+    m.restore
+
+    assert_equal 1, @sub.foo
+    assert_equal 1, @class.new.foo
+  end
+
+  # TODO better error messaging and bt.
+
   def util_raises msg = nil
     e = assert_raises MiniTest::Assertion do
       yield
