@@ -30,7 +30,7 @@ class TestMiniTest::TestExpects < MiniTest::Unit::TestCase
   def setup
     @class = Subject
     @sub = @class.new
-    @mock = @sub.expects(:foo)
+    @exp = @sub.expects(:foo)
   end
 
   def test_expects
@@ -42,13 +42,13 @@ class TestMiniTest::TestExpects < MiniTest::Unit::TestCase
   end
 
   def test_returns
-    @mock.returns(:bar)
+    @exp.returns(:bar)
 
     assert_equal :bar, @sub.foo
   end
 
   def test_with
-    @mock.
+    @exp.
       with(1).
       times(-1)
 
@@ -66,7 +66,7 @@ class TestMiniTest::TestExpects < MiniTest::Unit::TestCase
   end
 
   def test_with_class
-    @mock.
+    @exp.
       with(@class).
       times(-1)
 
@@ -79,41 +79,41 @@ class TestMiniTest::TestExpects < MiniTest::Unit::TestCase
   end
 
   def test_with_any_parameter
-    @mock.with(Object)
+    @exp.with(Object)
 
     @sub.foo(@sub)
   end
 
   def test_with_block
-    @mock.with{|v| v == 42}
+    @exp.with{|v| v == 42}
 
     @sub.foo(42)
 
-    @mock.with{|v| v == 41}.once
+    @exp.with{|v| v == 41}.once
 
     util_raises "mocked method :foo argument block returned false" do
       @sub.foo(42)
     end
 
-    @mock.with{|v1,v2| v1 == :bugs and v2 == :bunny }.once
+    @exp.with{|v1,v2| v1 == :bugs and v2 == :bunny }.once
     @sub.foo(:bugs, :bunny)
   end
 
   def test_restore
-    @mock.restore
-    @mock.restore
+    @exp.restore
+    @exp.restore
     assert_equal 1, @sub.foo
-    assert @mock.verify
+    assert @exp.verify
   end
 
   def test_class_expects
-    @mock.restore
+    @exp.restore
 
-    m = @class.
+    exp = @class.
       expects(:foo)
 
     refute @class.foo
-    m.restore
+    exp.restore
 
     assert_equal 'class method', @class.foo
   end
@@ -123,32 +123,32 @@ class TestMiniTest::TestExpects < MiniTest::Unit::TestCase
     util_raises do
       @sub.foo
     end
-    assert @mock.verify
+    assert @exp.verify
   end
 
   def test_times_never
-    @mock.times(0)
+    @exp.times(0)
 
     util_raises 'called too many times' do
       @sub.foo
     end
 
-    assert @mock.verify
+    assert @exp.verify
   end
 
   def test_times_once
-    @mock.times(1)
+    @exp.times(1)
 
     @sub.foo
     util_raises do
       @sub.foo
     end
 
-    assert @mock.verify
+    assert @exp.verify
   end
 
   def test_times_twice
-    @mock.times(2)
+    @exp.times(2)
 
     @sub.foo
     @sub.foo
@@ -156,7 +156,7 @@ class TestMiniTest::TestExpects < MiniTest::Unit::TestCase
       @sub.foo
     end
 
-    assert @mock.verify
+    assert @exp.verify
   end
 
   def test_yields
@@ -171,12 +171,12 @@ class TestMiniTest::TestExpects < MiniTest::Unit::TestCase
 
     assert_equal 4, val
 
-    @mock.restore
+    @exp.restore
   end
 
   def test_yields_failure
     def @sub.bar() yield 3 end
-    m = @sub.
+    exp = @sub.
       expects(:bar).
       yields(4)
 
@@ -185,18 +185,18 @@ class TestMiniTest::TestExpects < MiniTest::Unit::TestCase
     end
 
     util_raises do
-      m.verify
+      exp.verify
     end
 
-    @mock.restore
-    m.restore
+    @exp.restore
+    exp.restore
   end
 
   def test_yields_returns
-    @mock.restore
+    @exp.restore
 
     def @sub.bar() yield 3 end
-    @mock = @sub.
+    @exp = @sub.
       expects(:bar).
       yields(4)
 
@@ -205,7 +205,7 @@ class TestMiniTest::TestExpects < MiniTest::Unit::TestCase
     end
     return_bar
 
-    assert @mock.verify
+    assert @exp.verify
   end
 
   def test_yields_multiple_params
@@ -222,33 +222,33 @@ class TestMiniTest::TestExpects < MiniTest::Unit::TestCase
     @sub.bar do |*a| val = a end
     assert_equal [3,4], val
 
-    @mock.restore
+    @exp.restore
   end
 
   def test_any_instance
-    @mock.restore
+    @exp.restore
 
-    @mock = @class.
+    @exp = @class.
               any_instance.
               expects(:third).
               returns('tres')
 
     assert_equal 'tres', @sub.third
 
-    @mock.restore
+    @exp.restore
 
     assert_equal 3, @sub.third
   end
 
   def test_returns_self
-    assert_kind_of MiniTest::Expects, @mock
-    assert_same @mock, @mock.raises
-    assert_same @mock, @mock.restore
-    assert_same @mock, @mock.restore
-    assert_same @mock, @mock.returns
-    assert_same @mock, @mock.times(0)
-    assert_same @mock, @mock.with
-    assert_same @mock, @mock.yields
+    assert_kind_of MiniTest::Expects, @exp
+    assert_same @exp, @exp.raises
+    assert_same @exp, @exp.restore
+    assert_same @exp, @exp.restore
+    assert_same @exp, @exp.returns
+    assert_same @exp, @exp.times(0)
+    assert_same @exp, @exp.with
+    assert_same @exp, @exp.yields
   end
 
   def test_expects_non_existent_method
@@ -256,21 +256,21 @@ class TestMiniTest::TestExpects < MiniTest::Unit::TestCase
       @sub.expects(:bar)
     end
 
-    @mock.restore
+    @exp.restore
   end
 
   def test_method_missing_methods
-    m = @sub.
+    exp = @sub.
       expects(:meta_meth).
       returns('new')
 
     assert_equal 'new', @sub.meta_meth
 
-    m.restore
+    exp.restore
 
     assert_equal 'meta method', @sub.meta_meth
 
-    @mock.restore
+    @exp.restore
   end
 
   def test_expects_multiple_methods
@@ -290,7 +290,7 @@ class TestMiniTest::TestExpects < MiniTest::Unit::TestCase
   end
 
   def test_raises_default_error
-    @mock.raises
+    @exp.raises
 
     assert_raises RuntimeError do
       @sub.foo
@@ -299,7 +299,7 @@ class TestMiniTest::TestExpects < MiniTest::Unit::TestCase
 
   def test_raises_specific_error
     err = Class.new ::Exception
-    @mock.raises(err)
+    @exp.raises(err)
 
     assert_raises err do
       @sub.foo
@@ -307,7 +307,7 @@ class TestMiniTest::TestExpects < MiniTest::Unit::TestCase
   end
 
   def test_raises_message
-    @mock.raises('error')
+    @exp.raises('error')
 
     e = assert_raises RuntimeError do
       @sub.foo
@@ -317,7 +317,7 @@ class TestMiniTest::TestExpects < MiniTest::Unit::TestCase
 
   def test_raises_error_and_message_and_backtrace
     err = Class.new ::Exception
-    @mock.raises(err, 'error', ['bt'])
+    @exp.raises(err, 'error', ['bt'])
 
     e = assert_raises err do
       @sub.foo
@@ -327,50 +327,50 @@ class TestMiniTest::TestExpects < MiniTest::Unit::TestCase
   end
 
   def test_override_count
-    @mock.times 1
+    @exp.times 1
 
-    m = @sub.
+    exp = @sub.
       expects(:foo).
       never
 
-    assert_same @mock, m
+    assert_same @exp, exp
   end
 
   def test_called_wrong_params
-    @mock.with(1).once
+    @exp.with(1).once
 
     util_raises do
       @sub.foo(2)
     end
 
     util_raises do
-      @mock.verify
+      @exp.verify
     end
 
     @sub.foo(1) # verify
   end
 
   def test_mock_method_name_string
-    m = @sub.expects('foo')
+    exp = @sub.expects('foo')
 
-    assert_same m, @mock
+    assert_same exp, @exp
 
-    @mock.restore
-    m.restore
+    @exp.restore
+    exp.restore
   end
 
   def test_verify_message
-    @mock.once
+    @exp.once
 
     util_raises "mocked method :foo not called 1 times" do
-      @mock.verify
+      @exp.verify
     end
 
     @sub.foo # verify
   end
 
   def test_any_instance_reuse
-    @mock.restore
+    @exp.restore
 
     klass = Class.new do
       def foo() :foo end
@@ -390,14 +390,14 @@ class TestMiniTest::TestExpects < MiniTest::Unit::TestCase
   end
 
   def test_any_time
-    @mock.any_time
-    assert @mock.verify
+    @exp.any_time
+    assert @exp.verify
 
     @sub.foo
-    assert @mock.verify
+    assert @exp.verify
 
     @sub.foo
-    assert @mock.verify
+    assert @exp.verify
   end
 
   def test_default_no_params
@@ -409,7 +409,7 @@ class TestMiniTest::TestExpects < MiniTest::Unit::TestCase
   end
 
   def test_with_any_parameters
-    @mock.with{ true }
+    @exp.with{ true }
 
     @sub.foo 1,2,3
 
@@ -417,8 +417,8 @@ class TestMiniTest::TestExpects < MiniTest::Unit::TestCase
   end
 
   def test_with_no_parameters
-    @mock.with{ true }
-    @mock.with # override
+    @exp.with{ true }
+    @exp.with # override
 
     util_raises do
       @sub.foo 1
@@ -429,7 +429,7 @@ class TestMiniTest::TestExpects < MiniTest::Unit::TestCase
   end
 
   def test_any_instance_meta_method
-    @mock.restore
+    @exp.restore
 
     @class.
       any_instance.
@@ -440,7 +440,7 @@ class TestMiniTest::TestExpects < MiniTest::Unit::TestCase
   end
 
   def test_any_instance_only_on_class
-    @mock.restore
+    @exp.restore
 
     assert_raises NoMethodError do
       @sub.any_instance
@@ -448,24 +448,24 @@ class TestMiniTest::TestExpects < MiniTest::Unit::TestCase
   end
 
   def test_duplicate_expects_any_instance
-    @mock.restore
+    @exp.restore
 
-    m = @class.any_instance.expects(:foo).returns :any_instance
+    exp = @class.any_instance.expects(:foo).returns :any_instance
 
-    @mock = @sub.expects(:foo).returns :instance
+    @exp = @sub.expects(:foo).returns :instance
 
     assert_equal :instance, @sub.foo
     assert_equal :any_instance, @class.new.foo
 
-    @mock.restore
-    m.restore
+    @exp.restore
+    exp.restore
 
     assert_equal 1, @sub.foo
     assert_equal 1, @class.new.foo
   end
 
   def test_double_any_instance
-    @mock.restore
+    @exp.restore
 
     @class = Class.new do
       def foo() :foo end
@@ -482,19 +482,19 @@ class TestMiniTest::TestExpects < MiniTest::Unit::TestCase
   end
 
   def test_any_instance_double_expects
-    @mock.restore
+    @exp.restore
 
     @class = Class.new do
       def foo() :foo end
       def bar() :bar end
     end
 
-    @mock = @class.any_instance
+    @exp = @class.any_instance
 
-    @mock.expects(:foo).returns 'foo'
-    new_mock = @mock.expects(:bar).returns 'bar'
+    @exp.expects(:foo).returns 'foo'
+    new_exp = @exp.expects(:bar).returns 'bar'
 
-    refute_same @mock, new_mock
+    refute_same @exp, new_exp
 
     @sub = @class.new
 
