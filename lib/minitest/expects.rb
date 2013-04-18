@@ -33,9 +33,10 @@ class MiniTest::Expects
     @instances ||= Hash.new
   end
 
-  def self.teardown # :nodoc:
+  def self.teardown passed # :nodoc:
     @instances.values.each do |expecter|
-      expecter.verify.restore
+      expecter.verify if passed
+      expecter.restore
     end
   end
 
@@ -352,7 +353,7 @@ module MiniTest::Expects::LifeCycleHooks
 
   def after_teardown
     super
-    MiniTest::Expects.teardown if passed?
+    MiniTest::Expects.teardown passed?
   end
 end
 

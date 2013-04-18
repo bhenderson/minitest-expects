@@ -522,12 +522,19 @@ class TestMiniTest::TestExpects < MiniTest::Unit::TestCase
     assert_in_delta Time.now, t0, 1
   end
 
-  def test_only_teardown_if_passed_eh
+  def test_only_verify_if_passed_eh
     def self.before_teardown
       @passed = false
       super
     end
-    pass
+    assert @exp # make sure we still have this.
+  end
+
+  def test_restore_always
+    @class.expects(:foo).returns 'mocked'
+    MiniTest::Expects.teardown false
+
+    assert_equal 'class method', @class.foo
   end
 
   def test_returns_original
