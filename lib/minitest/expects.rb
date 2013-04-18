@@ -298,19 +298,43 @@ class MiniTest::Expects
 
 end
 
-# :stopdoc:
-
 class Object
+
+  ##
+  # Main method to add an expectation on an object.
+  #
+  # See MiniTest::Expects#expects
+
   def expects name
     MiniTest::Expects.expects(self, name)
   end
 end
 
 class Module
+
+  ##
+  # Main method to add an expectation on any instance of a Class/Module.
+  #
+  #   class Foo
+  #     def bar; end
+  #   end
+  #
+  #   Foo.any_instance.expects(:bar)
+  #   Foo.new.bar # expectation satisfied.
+  #
+  #   module Mod
+  #     def bar; end
+  #   end
+  #   include Mod
+  #   Mod.any_instance.expects(:bar)
+  #   bar # expectation satisfied.
+
   def any_instance
     MiniTest::Expects.new(self, true)
   end
 end
+
+# :stopdoc:
 
 module MiniTest::Expects::LifeCycleHooks
   def before_setup
