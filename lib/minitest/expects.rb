@@ -46,6 +46,7 @@ class MiniTest::Expects
     @count = 1
     @meth = nil
     @returns = nil
+    @returns_original = false
     @with = [] # default no parameters
   end
 
@@ -108,7 +109,7 @@ class MiniTest::Expects
 
     expecter = self
     subject_class.__send__ :define_method, name do |*args, &block|
-      expecter.match?(*args, &block)
+      expecter.match?(self, args, &block)
     end
 
     self.class.instances[instance_key] = self
@@ -116,7 +117,7 @@ class MiniTest::Expects
     self
   end
 
-  def match? *args # :nodoc:
+  def match? obj, args, &block # :nodoc:
     # copied some error messages and logic from MiniTest::Mock.
 
     flunk "called too many times" if @count == 0
@@ -158,6 +159,8 @@ class MiniTest::Expects
     yield *@yields if block_given?
 
     raise *@raises if @raises
+
+    return obj.send new_meth_name, *args, &block if @returns_original
 
     @returns
   end
@@ -215,6 +218,11 @@ class MiniTest::Expects
 
   def returns val = nil
     @returns = val
+    self
+  end
+
+  def returns_original
+    @returns_original = true
     self
   end
 
@@ -344,7 +352,7 @@ module MiniTest::Expects::LifeCycleHooks
 
   def after_teardown
     super
-    MiniTest::Expects.teardown
+    MiniTest::Expects.teardown if passed?
   end
 end
 
