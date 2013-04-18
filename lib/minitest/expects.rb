@@ -161,9 +161,10 @@ class MiniTest::Expects
 
     raise *@raises if @raises
 
+    # probably should go before yield/raise.
     return obj.send new_meth_name, *args, &block if @returns_original
 
-    @returns
+    return @returns
   end
 
   ##
