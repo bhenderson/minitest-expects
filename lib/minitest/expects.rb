@@ -89,7 +89,11 @@ class MiniTest::Expects
 
     # woh! is this hacky? Call allocate to get around not knowing how to call
     # new().
-    sub = @any_instance ? @subject.allocate : @subject
+    sub = if @any_instance and @subject.is_a?(Class)
+            @subject.allocate
+          else
+            @subject
+          end
 
     # handle meta methods.
     # copied from MiniTest::Mock stub()
@@ -302,7 +306,7 @@ class Object
   end
 end
 
-class Class
+class Module
   def any_instance
     MiniTest::Expects.new(self, true)
   end

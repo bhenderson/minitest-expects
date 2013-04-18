@@ -510,6 +510,18 @@ class TestMiniTest::TestExpects < MiniTest::Unit::TestCase
     MiniTest::Expects.instances.delete [@sub, :foo]
   end
 
+  def test_module_methods
+    @exp.restore
+
+    Kernel.any_instance.expects(:sleep).with(10)
+
+    t0 = Time.now
+
+    assert_nil sleep 10
+
+    assert_in_delta Time.now, t0, 1
+  end
+
   # TODO better error messaging
 
   def util_raises msg = nil
