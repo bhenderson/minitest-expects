@@ -54,13 +54,19 @@ class TestMiniTest::TestExpects < MiniTest::Unit::TestCase
 
     @sub.foo 1
 
-    util_raises "mocked method :foo expects 1 arguments, got 2" do
+    msg = "mocked method #<TestMiniTest::TestExpects::Subject:0xXXXXXX "\
+          "@count=0>.foo expects 1 arguments, got 2"
+    util_raises msg do
       @sub.foo 1, 2
     end
-    util_raises "mocked method :foo called with unexpected arguments [2]" do
+    msg = "mocked method #<TestMiniTest::TestExpects::Subject:0xXXXXXX "\
+          "@count=0>.foo called with unexpected arguments [2]"
+    util_raises msg do
       @sub.foo 2
     end
-    util_raises "mocked method :foo expects 1 arguments, got 0" do
+    msg = "mocked method #<TestMiniTest::TestExpects::Subject:0xXXXXXX "\
+          "@count=0>.foo expects 1 arguments, got 0"
+    util_raises msg do
       @sub.foo
     end
   end
@@ -91,7 +97,9 @@ class TestMiniTest::TestExpects < MiniTest::Unit::TestCase
 
     @exp.with{|v| v == 41}.once
 
-    util_raises "mocked method :foo argument block returned false" do
+    msg = "mocked method #<TestMiniTest::TestExpects::Subject:0xXXXXXX "\
+          "@count=0>.foo argument block returned false"
+    util_raises msg do
       @sub.foo(42)
     end
 
@@ -129,7 +137,9 @@ class TestMiniTest::TestExpects < MiniTest::Unit::TestCase
   def test_times_never
     @exp.times(0)
 
-    util_raises 'called too many times' do
+    msg = 'mocked method #<TestMiniTest::TestExpects::Subject:0xXXXXXX '\
+          '@count=0>.foo called too many times'
+    util_raises msg do
       @sub.foo
     end
 
@@ -180,7 +190,9 @@ class TestMiniTest::TestExpects < MiniTest::Unit::TestCase
       expects(:bar).
       yields(4)
 
-    util_raises 'mocked method :bar expected to yield, no block given' do
+    msg = 'mocked method #<TestMiniTest::TestExpects::Subject:0xXXXXXX '\
+          '@count=0>.bar expected to yield, no block given'
+    util_raises msg do
       @sub.bar
     end
 
@@ -549,7 +561,7 @@ class TestMiniTest::TestExpects < MiniTest::Unit::TestCase
     e = assert_raises MockExpectationError do
       yield
     end
-    assert_equal msg, e.message if msg
+    assert_equal mu_pp_for_diff(msg), mu_pp_for_diff(e.message) if msg
   end
 
 end

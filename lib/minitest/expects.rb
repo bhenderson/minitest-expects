@@ -121,17 +121,20 @@ class MiniTest::Expects
   def match? obj, args, &block # :nodoc:
     # copied some error messages and logic from MiniTest::Mock.
 
-    flunk "called too many times" if @count == 0
+    if @count == 0
+      flunk "mocked method %p.%s called too many times" %
+        [obj, @meth]
+    end
 
     if Proc === @with
       unless @with.call(*args)
-        flunk "mocked method %p argument block returned false" %
-          [@meth]
+        flunk "mocked method %p.%s argument block returned false" %
+          [obj, @meth]
       end
     else
       if @with.size != args.size
-        flunk "mocked method %p expects %d arguments, got %d" %
-          [@meth, @with.size, args.size]
+        flunk "mocked method %p.%s expects %d arguments, got %d" %
+          [obj, @meth, @with.size, args.size]
       end
 
       fully_matched = @with.zip(args).all? { |val1, val2|
@@ -139,16 +142,16 @@ class MiniTest::Expects
       }
 
       unless fully_matched
-        flunk "mocked method %p called with unexpected arguments %p" %
-          [@meth, args]
+        flunk "mocked method %p.%s called with unexpected arguments %p" %
+          [obj, @meth, args]
       end
     end
 
     # TODO check arity?
     if @yields
       unless block_given?
-        flunk "mocked method %p expected to yield, no block given" %
-          [@meth]
+        flunk "mocked method %p.%s expected to yield, no block given" %
+          [obj, @meth]
       end
     end
 
@@ -222,6 +225,10 @@ class MiniTest::Expects
     @returns = val
     self
   end
+
+  ##
+  # Set mocked method to call original method with original args and block and
+  # return the result.
 
   def returns_original
     @returns_original = true
