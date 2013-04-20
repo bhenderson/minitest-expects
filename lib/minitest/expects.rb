@@ -13,7 +13,7 @@ class MiniTest::Expects
   def self.expects subject, name # :nodoc:
     # save an instance creation at the cost of duplicating #instance_key
     # logic.
-    instances[[subject, name.intern]] || new(subject).expects(name)
+    instances[[subject, name.to_sym]] || new(subject).expects(name)
   end
 
   def self.instances # :nodoc:
@@ -38,10 +38,6 @@ class MiniTest::Expects
     @returns_original = false
     @with = [] # default no parameters
     @yields = nil
-  end
-
-  def initialize_dup other # :nodoc:
-    initialize other.subject, other.any_instance
   end
 
   ##
@@ -87,9 +83,13 @@ class MiniTest::Expects
 
   def expects name
     # any_instance
-    return dup.expects(name) if @meth
+    if @meth
+      return self.class.
+               new(@subject, @any_instance).
+               expects(name)
+    end
 
-    @meth = name.intern
+    @meth = name.to_sym
 
     if expecter = self.class.instances[instance_key]
       return expecter
@@ -336,7 +336,9 @@ class MiniTest::Expects
                 @subject.instance_methods :
                 @subject.methods
 
-    !methods.include? new_meth_name
+    # 1.8.x returns strings.
+    !( methods.include?(new_meth_name) or
+       methods.include?(new_meth_name.to_s))
   end
 
 end
