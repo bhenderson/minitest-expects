@@ -374,7 +374,7 @@ class TestMiniTest::TestExpects < MiniTest::Unit::TestCase
   def test_verify_message
     @exp.once
 
-    util_raises "mocked method :foo not called 1 times" do
+    util_raises "mocked method :foo not called 1 time(s)" do
       @exp.verify
     end
 

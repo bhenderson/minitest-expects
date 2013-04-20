@@ -262,7 +262,7 @@ class MiniTest::Expects
 
   def verify
     if @count > 0
-      flunk "mocked method %p not called %d times" %
+      flunk "mocked method %p not called %d time(s)" %
         [@meth, @count]
     end
     self
