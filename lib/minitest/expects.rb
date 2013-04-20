@@ -5,20 +5,7 @@ require 'minitest/mock'
 # Mocking framework based off of MiniTest::Mock, but with the api of
 # Mocha
 #
-#   class Greeter
-#     def hi
-#       'hello world'
-#     end
-#   end
-#
-#   gtr = Greeter.new
-#   expecter = gtr.expects(:hi).returns 'yo!'
-#
-#   gtr.hi # => 'yo!'
-#   expecter.verify # => true
-#   expecter.restore
-#
-#   gtr.hi # => 'hello world'
+# see #expects for details.
 
 class MiniTest::Expects
   VERSION = '0.1.0'
@@ -59,6 +46,8 @@ class MiniTest::Expects
 
   ##
   # Allow any number of times.
+  #
+  # see #times
 
   def any_time
     times(-1)
@@ -68,6 +57,21 @@ class MiniTest::Expects
   # Main entry method. This method is invoked when Object#expects is
   # called. It returns the same expecter if +name+ and subject is the
   # same.
+  #
+  #   class Greeter
+  #     def hi
+  #       'hello world'
+  #     end
+  #   end
+  #
+  #   gtr = Greeter.new
+  #   expecter = gtr.expects(:hi).returns 'yo!'
+  #
+  #   gtr.hi # => 'yo!'
+  #   expecter.verify # => true
+  #   expecter.restore
+  #
+  #   gtr.hi # => 'hello world'
   #
   #   exp1 = gtr.expects(:hi)
   #   exp2 = gtr.expects(:hi)
@@ -193,7 +197,7 @@ class MiniTest::Expects
   ##
   # Set mocked method to raise when called.
   #
-  # Arguments are exactly like raise()
+  # +args+ passed directly to Kernel#raise
 
   def raises *args
     @raises = args
@@ -240,9 +244,11 @@ class MiniTest::Expects
   ##
   # Set how many times the mocked method can be called.
   #
-  # 0  - exactly 0 times.
-  # +n - exactly +num+ times
-  # -n - any number of times.
+  # -  0 - exactly 0 times.
+  # - +n - exactly +num+ times
+  # - -n - any number of times.
+  #
+  # Mocked method will raise if called more than +num+.
 
   def times num
     @count = num
@@ -265,9 +271,27 @@ class MiniTest::Expects
   ##
   # Set the expected arguments of the mocked method.
   #
-  # Arguments are matched against #== then #=== to allow case matching.
+  # If a block is given, the block is called with the original arguments and
+  # passes if the block returns true.
+  # Arguments are matched against #== then #=== to allow case matching. This
+  # allows for matching against classes or regexp's.
   #
-  # Raises when mocked method arguments don't match.
+  # (pretty much) any parameter.
+  #
+  #   gtr.expects(:hi).with(Object)
+  #   gtr.hi(MyCoolClass.new)
+  #
+  # regexp match.
+  #
+  #   gtr.expects(:hi).with(/match/)
+  #   gtr.hi('does this really match?')
+  #
+  # using a block
+  #
+  #   gtr.expects(:hi).with{|data| data['foo']}
+  #   gtr.hi 'foo' => true
+  #
+  # Mocked method will raise if not matched.
 
   def with *args, &block
     @with = block || args
@@ -277,7 +301,7 @@ class MiniTest::Expects
   ##
   # Set the value that the mocked method yields when called.
   #
-  # Raises if mocked method not called with a block.
+  # Mocked method will raise if no block given.
 
   def yields *args
     @yields = args
@@ -353,9 +377,7 @@ class Module
   end
 end
 
-# :stopdoc:
-
-module MiniTest::Expects::LifeCycleHooks
+module MiniTest::Expects::LifecycleHooks # :nodoc: all
   def before_setup
     MiniTest::Expects.instances.clear
     super
@@ -367,6 +389,6 @@ module MiniTest::Expects::LifeCycleHooks
   end
 end
 
-class MiniTest::Unit::TestCase
-  include MiniTest::Expects::LifeCycleHooks
+class MiniTest::Unit::TestCase # :nodoc: all
+  include MiniTest::Expects::LifecycleHooks
 end

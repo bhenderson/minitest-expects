@@ -1,3 +1,56 @@
+=== 0.1.0 / 2013-04-20
+
+* 47 unknowns:
+
+  * Add any_time method.
+  * Add class method expects
+  * Add comment.
+  * Add docs to Object/Module.
+  * Add instance_key method.
+  * Add object to failure messages.
+  * Add some stuff.
+  * Add test for duplicate expects.
+  * Allow to mock strings.
+  * Be explicit about returning. Add note.
+  * Change to using MockExpectationError
+  * Clean up tests.
+  * Cleanup warnings.
+  * Count even if block returns.
+  * Don't count if block not given and expected.
+  * Don't doco.
+  * First run through of docs.
+  * Fix any_instance to reuse obj.
+  * Fix any_instance.
+  * Fix manifest.
+  * Fix teardown to always restore.
+  * Fixed mocking module methods. (minitest@8bc0037).
+  * Fixup dependencies. Cleanup bin and ignores.
+  * Get teardown working.
+  * Handle any_instance meta_method.
+  * I see why Ryan did this. By not raising an Assertion, we get better
+  * I'm not sure on this one. It seems nice to save an instance, but I'm
+  * If the test is already marked as failed, don't bother to teardown.
+  * Implements returns_original. No double errors
+  * Initial commit.
+  * Long var names.
+  * Move LifeCycleHooks to bottom.
+  * Not sure how to write an explicit test for this.
+  * Override count. Wrong params.
+  * Remove newer rdoc syntax.
+  * Rename lvar.
+  * Rename metaclass to subject_class.
+  * Rename test vars.
+  * Test default behavior of no parameters allowed.
+  * Update some error messages to more resemble (copied from) minitest/mock.
+  * Use __send__.
+  * Use instance_key.
+  * Yield multiple arguments. Default count is 1.
+  * any_instance only on Class.
+  * backtraces in errors.
+  * duplicating logic.
+  * handle double any_instance.
+
+
 === 1.0.0 / 2013-03-12
 
 * 1 major enhancement
