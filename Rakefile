@@ -11,7 +11,7 @@ Hoe.plugin :version
 Hoe.spec 'minitest-expects' do
   developer('Brian Henderson', 'henderson.bj@gmail.com')
 
-  extra_deps << ['mocha', '~> 0.13.0']
+  extra_deps << ['minitest', ['>= 3.3.0', '< 5.0']]
 end
 
 # vim: syntax=ruby
