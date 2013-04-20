@@ -4,7 +4,7 @@
 
 == DESCRIPTION:
 
-Minitest flavored Mocha. I like Mocha's[http://gofreerange.com/mocha/docs/]
+MiniTest flavored Mocha. I like Mocha's[http://gofreerange.com/mocha/docs/]
 api. I wanted to see if I could take the simplicity in MiniTest::Mock and add
 the Mocha api. A lot of the actual mocking code is ripped straight from
 MiniTest::Mock. I couldn't figure out a way to just extend it.
