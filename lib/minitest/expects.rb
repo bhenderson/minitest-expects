@@ -46,9 +46,11 @@ class MiniTest::Expects
     @any_instance = !!any_instance
     @count = 1
     @meth = nil
+    @raises = nil
     @returns = nil
     @returns_original = false
     @with = [] # default no parameters
+    @yields = nil
   end
 
   def initialize_dup other # :nodoc:
@@ -59,7 +61,7 @@ class MiniTest::Expects
   # Allow any number of times.
 
   def any_time
-    times -1
+    times(-1)
   end
 
   ##
@@ -160,9 +162,9 @@ class MiniTest::Expects
     @count -= 1
 
     # must be after count
-    yield *@yields if block_given?
+    yield(*@yields) if block_given?
 
-    raise *@raises if @raises
+    raise(*@raises) if @raises
 
     # probably should go before yield/raise.
     return obj.send new_meth_name, *args, &block if @returns_original
