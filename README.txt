@@ -18,9 +18,9 @@ MiniTest::Mock. I couldn't figure out a way to just extend it.
 * with[rdoc-ref:MiniTest::Expects#with] does not take any special
   parameter matchers (although you could easily extend it by overriding #==).
   See the docs for details.
-* like MiniTest::Mock and unlike Mocha, expects cannot be called for methods
-  that don't exist. I try to account for meta methods (ActiveRecord) by
-  checking respond_to?() on the object.
+* like MiniTest::Mock expects cannot be called for methods
+  that don't exist. (This is configurable for Mocha.) I try to account for
+  meta methods (ActiveRecord) by checking respond_to?() on the object.
 * patches welcome!
 
 == SYNOPSIS:
