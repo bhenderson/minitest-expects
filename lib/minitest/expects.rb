@@ -308,10 +308,6 @@ class MiniTest::Expects
     self
   end
 
-  protected
-
-  attr_reader :subject, :any_instance
-
   private
 
   def flunk msg = nil
