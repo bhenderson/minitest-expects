@@ -1,3 +1,4 @@
+gem 'minitest' # make autotest work.
 require 'minitest/autorun'
 
 require 'minitest/expects'
