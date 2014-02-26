@@ -551,9 +551,11 @@ class TestMiniTest::TestExpects < MiniTest::Unit::TestCase
   end
 
   def test_returns_original
+    exp = @sub.expects(:send)
     @exp.returns_original
 
     assert_equal 1, @sub.foo
+    exp.restore
   end
 
   # TODO better error messaging
